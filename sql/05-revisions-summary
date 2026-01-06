@@ -1,0 +1,39 @@
+-- 05_vw_covid_revision_summary.sql
+-- Purpose: Aggregate revisions for KPI and trend analysis
+
+CREATE OR REPLACE VIEW
+  `project2-482922.Covid_Rates.vw_covid_revision_summary` AS
+SELECT
+  snapshot_date,
+  prev_snapshot_date,
+  State,
+  AgeCategory_Legend,
+  Type,
+
+  COUNT(*) AS rows_compared,
+
+  -- how many rows changed
+  SUM(flag_changed) AS changed_rows,
+  SAFE_DIVIDE(SUM(flag_changed), COUNT(*)) AS pct_rows_changed,
+
+  -- material revisions
+  SUM(flag_material_abs_1) AS material_abs_1_count,
+  SAFE_DIVIDE(SUM(flag_material_abs_1), COUNT(*)) AS pct_material_abs_1,
+
+  SUM(flag_material_pct_10) AS material_pct_10_count,
+  SAFE_DIVIDE(SUM(flag_material_pct_10), COUNT(*)) AS pct_material_pct_10,
+
+  -- magnitude summaries
+  AVG(ABS(revision_abs)) AS avg_abs_revision,
+  MAX(ABS(revision_abs)) AS max_abs_revision,
+
+  AVG(ABS(revision_pct)) AS avg_pct_revision,
+  MAX(ABS(revision_pct)) AS max_pct_revision
+
+FROM `project2-482922.Covid_Rates.vw_covid_revisions`
+GROUP BY
+  snapshot_date,
+  prev_snapshot_date,
+  State,
+  AgeCategory_Legend,
+  Type;
